@@ -8,10 +8,14 @@ on:
 
 permissions:
   contents: write
+  actions: read # SignPath reads the uploaded build artifacts
 
 jobs:
   build:
     runs-on: windows-latest
+    env:
+      # Signing runs only for v* tags, and only once the SignPath secret/variables are configured.
+      SIGN: ${{ startsWith(github.ref, 'refs/tags/v') && secrets.SIGNPATH_API_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -32,11 +36,65 @@ jobs:
       - name: Publish single-file exe
         run: dotnet publish src/VpnRdp/VpnRdp.csproj -p:PublishProfile=win-x64 -p:Version=${{ steps.ver.outputs.version }}
 
+      # ---- Sign the app exe first so the installer bundles the signed copy ----
+      - name: Upload unsigned exe
+        id: unsigned-exe
+        if: env.SIGN == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-exe
+          path: artifacts/publish/VpnRdp.exe
+
+      - name: Sign exe (SignPath)
+        if: env.SIGN == 'true'
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          artifact-configuration-slug: exe
+          github-artifact-id: ${{ steps.unsigned-exe.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: artifacts/publish
+
       - name: Build installer
         shell: pwsh
         run: |
           choco install innosetup --no-progress -y
           & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" /DAppVersion=${{ steps.ver.outputs.version }} installer\VpnRdp.iss
+
+      # ---- Then sign the installer ----
+      - name: Upload unsigned installer
+        id: unsigned-setup
+        if: env.SIGN == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-setup
+          path: artifacts/VpnRdp-Setup-*.exe
+
+      - name: Sign installer (SignPath)
+        if: env.SIGN == 'true'
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          artifact-configuration-slug: installer
+          github-artifact-id: ${{ steps.unsigned-setup.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: artifacts
+
+      - name: Verify signatures
+        if: env.SIGN == 'true'
+        shell: pwsh
+        run: |
+          foreach ($f in @('artifacts/publish/VpnRdp.exe') + (Get-ChildItem artifacts/VpnRdp-Setup-*.exe).FullName) {
+            $s = Get-AuthenticodeSignature $f
+            "$f : $($s.Status) — $($s.SignerCertificate.Subject)"
+            if ($s.Status -ne 'Valid') { throw "$f is not validly signed" }
+          }
 
       - uses: actions/upload-artifact@v4
         with:

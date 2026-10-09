@@ -77,6 +77,26 @@ iscc /DAppVersion=0.1.0 installer\VpnRdp.iss                           # -> arti
 
 Pushing a `v*` tag runs `.github/workflows/release.yml`. It tests, publishes, builds the installer, and attaches both files to a GitHub release.
 
+## Code signing policy
+
+Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org).
+
+- Only release builds made by this repository's GitHub Actions workflow from a `v*` tag are signed. Signing is done through SignPath's GitHub integration, so every signed binary can be traced to a specific commit.
+- Committers and reviewers: [rjeffmyers](https://github.com/rjeffmyers)
+- Approvers: [rjeffmyers](https://github.com/rjeffmyers)
+
+### Privacy
+
+This program will not transfer any information to other networked systems unless specifically requested by the user or the person installing or operating it. The only network traffic it creates is:
+- the VPN connection you start;
+- the Remote Desktop session you open;
+- the OpenVPN download from winget, when you choose to install OpenVPN in Setup;
+- a browser sign-in page, when your VPN server requests web/SSO authentication.
+
+## License
+
+Public domain ([The Unlicense](LICENSE)).
+
 ## Project layout
 
 ```
