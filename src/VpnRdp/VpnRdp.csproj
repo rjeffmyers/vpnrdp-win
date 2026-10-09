@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AssemblyName>VpnRdp</AssemblyName>
+    <RootNamespace>VpnRdp</RootNamespace>
+    <Version>0.1.0</Version>
+    <Product>VPN+RDP Manager</Product>
+    <Company>rjeffmyers</Company>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <!-- Single-file, self-contained settings live in Properties/PublishProfiles/win-x64.pubxml -->
+    <!-- WinForms is only used for the tray icon; DPI awareness is set in app.manifest for WPF. -->
+    <NoWarn>$(NoWarn);WFO0003</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- WPF and WinForms both define Application, MessageBox, etc.; WinForms is only used for the tray icon. -->
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="VpnRdp.Tests" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,52 @@
+<Window x:Class="VpnRdp.Views.SetupWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Setup OpenVPN" Width="560" SizeToContent="Height" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner">
+    <StackPanel Margin="16">
+        <TextBlock TextWrapping="Wrap" Margin="0,0,0,12">
+            This app uses <Bold>OpenVPN Community</Bold> to connect. Setup needs an administrator
+            <Bold>once</Bold>: it installs OpenVPN (if needed) and adds your Windows account to the
+            "OpenVPN Administrators" group so you can connect afterwards without admin rights.
+        </TextBlock>
+
+        <GroupBox Header="Current status">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Style="{StaticResource FieldLabel}" Text="OpenVPN" />
+                <TextBlock Grid.Column="1" x:Name="InstalledText" VerticalAlignment="Center" TextWrapping="Wrap" />
+                <TextBlock Grid.Row="1" Style="{StaticResource FieldLabel}" Text="Interactive Service" />
+                <TextBlock Grid.Row="1" Grid.Column="1" x:Name="ServiceText" VerticalAlignment="Center" />
+                <TextBlock Grid.Row="2" Style="{StaticResource FieldLabel}" Text="Your account" />
+                <TextBlock Grid.Row="2" Grid.Column="1" x:Name="AuthText" VerticalAlignment="Center" TextWrapping="Wrap" />
+            </Grid>
+        </GroupBox>
+
+        <GroupBox Header="Actions">
+            <StackPanel>
+                <Button x:Name="WingetButton" Content="Install / update OpenVPN and set up my account (recommended)"
+                        HorizontalAlignment="Stretch" Click="Winget_Click" />
+                <Button x:Name="MsiButton" Content="Install from a downloaded OpenVPN .msi file..."
+                        HorizontalAlignment="Stretch" Click="Msi_Click" />
+                <Button x:Name="FixButton" Content="Only set up my account (OpenVPN already installed)"
+                        HorizontalAlignment="Stretch" Click="Fix_Click" />
+                <TextBlock Margin="0,4,0,0">
+                    <Hyperlink Click="DownloadPage_Click">Open the OpenVPN Community download page</Hyperlink>
+                </TextBlock>
+            </StackPanel>
+        </GroupBox>
+
+        <TextBlock x:Name="ResultText" TextWrapping="Wrap" Margin="0,4,0,8" />
+        <ProgressBar x:Name="Progress" Height="6" IsIndeterminate="True" Visibility="Collapsed" Margin="0,0,0,8" />
+
+        <Button Content="Close" IsCancel="True" HorizontalAlignment="Right" />
+    </StackPanel>
+</Window>
